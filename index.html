@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Pro Dashboard ⚡</title>
+    <style>
+        /* PALETA NEÓN */
+        :root {
+            --bg: #000000;
+            --card: #050505;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --border-color: #ffffff;
+            
+            --neon-blue: #00f7ff;
+            --neon-green: #39ff14;
+            --neon-yellow: #fff01f;
+            --neon-red: #ff073a;
+            --neon-purple: #bc13fe;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+            align-items: start;
+        }
+
+        .main-card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 3px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        
+        h2, h3 { text-transform: uppercase; letter-spacing: 2px; margin-top: 0; text-shadow: 0 0 10px currentColor; }
+        label { font-weight: bold; color: var(--text-secondary); font-size: 0.7rem; margin-bottom: 5px; text-shadow: 0 0 5px rgba(163, 163, 163, 0.5); }
+
+        .col-left { display: flex; flex-direction: column; gap: 2rem; }
+        .col-right { display: flex; flex-direction: column; }
+
+        .inputs { display: flex; justify-content: center; gap: 20px; margin-bottom: 1.5rem; }
+        .input-group { display: flex; flex-direction: column; }
+
+        input[type="time"], input[type="text"], input[type="number"] {
+            padding: 10px; border-radius: 8px; border: 2px solid var(--border-color);
+            background: var(--bg); color: var(--text-primary); text-align: center;
+            font-weight: bold; font-size: 1rem; transition: box-shadow 0.3s;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        input:focus { outline: none; box-shadow: 0 0 15px var(--border-color); }
+
+        .progress-container {
+            width: 100%; background: #000000; border-radius: 50px;
+            height: 30px; margin: 20px 0; overflow: hidden;
+            border: 3px solid var(--border-color); padding: 2px; box-sizing: border-box;
+        }
+        
+        #main-bar, #lunch-bar { transition: width 1s linear, background 0.3s ease, box-shadow 0.3s ease; }
+        .task-bar { transition: width 0.05s linear; } 
+        
+        #main-bar {
+            height: 100%; border-radius: 50px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+            box-shadow: 0 0 15px var(--neon-green), 0 0 5px var(--neon-blue);
+        }
+        
+        #lunch-bar {
+            height: 100%; border-radius: 50px;
+            background: linear-gradient(90deg, #6d28d9, var(--neon-purple));
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        .warning-mode {
+            background: linear-gradient(90deg, var(--neon-yellow), var(--neon-red)) !important;
+            box-shadow: 0 0 20px var(--neon-red), 0 0 10px var(--neon-yellow) !important;
+        }
+        
+        #main-pct { color: var(--neon-green); text-shadow: 0 0 15px var(--neon-green); font-size: 3rem; font-weight: 900; }
+        #lunch-pct { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); font-size: 3rem; font-weight: 900; }
+
+        /* --- TAREAS --- */
+        #task-list { width: 100%; margin-top: 1rem; }
+        .task-card {
+            background: var(--card); padding: 1rem; border-radius: 12px;
+            margin-bottom: 1rem; border: 2px solid; 
+            animation: fadeIn 0.3s ease; transition: opacity 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .btn-add {
+            background: var(--bg); color: var(--text-primary);
+            border: 2px solid var(--border-color); padding: 10px 25px;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+            margin-bottom: 1rem; text-transform: uppercase; transition: all 0.3s; text-shadow: 0 0 5px white;
+        }
+        .btn-add:hover { 
+            background: var(--neon-blue); color: black; 
+            border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); text-shadow: none;
+        }
+        
+        .task-header { display: flex; justify-content: space-between; align-items: center; }
+        .task-title { font-weight: bold; text-shadow: 0 0 8px currentColor; }
+        
+        .actions { display: flex; align-items: center; gap: 8px; }
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 1.3rem; transition: all 0.2s; text-shadow: 0 0 5px white; }
+        .action-btn:hover { transform: scale(1.2); }
+        .pause-btn { color: white; }
+        .pause-btn:hover { color: var(--neon-yellow); text-shadow: 0 0 15px var(--neon-yellow); }
+        .delete-btn { color: white; }
+        .delete-btn:hover { color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red); }
+        
+        .ms-alert { color: var(--neon-yellow); font-weight: bold; text-shadow: 0 0 10px var(--neon-yellow); }
+
+        #completed-section { margin-top: 2rem; display: none; }
+        .completed-card {
+            background: var(--card); padding: 0.8rem 1rem; border-radius: 8px;
+            margin-bottom: 0.8rem; border: 1px solid var(--border-color);
+            border-left: 5px solid; display: flex; justify-content: space-between;
+            align-items: center; opacity: 0.8; animation: fadeIn 0.5s ease;
+        }
+        
+        @media (max-width: 800px) { .dashboard { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="col-left">
+        <div class="main-card">
+            <h2>Jornada General 🕒</h2>
+            <div class="inputs">
+                <div class="input-group">
+                    <label>ENTRADA</label>
+                    <input type="time" id="start-time" value="08:00">
+                </div>
+                <div class="input-group">
+                    <label>SALIDA</label>
+                    <input type="time" id="end-time" value="17:00">
+                </div>
+            </div>
+            <div id="main-pct">100%</div>
+            <div id="main-time" style="color: var(--text-secondary); font-family: monospace;">00:00:00 restantes</div>
+            <div class="progress-container">
+                <div id="main-bar"></div>
+            </div>
+        </div>
+
+        <div class="main-card" style="border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);">
+            <h2 style="color: var(--neon-purple);">Almuerzo 🍔</h2>
+            <div class="inputs">
+                <div class="input-group">
+                    <label>HORA DE COMER</label>
+                    <input type="time" id="lunch-time" value="13:00" style="border-color: var(--neon-purple);">
+                </div>
+            </div>
+            <div id="lunch-pct">100%</div>
+            <div id="lunch-time-text" style="color: var(--text-secondary); font-family: monospace;">00:00:00 restantes</div>
+            <div class="progress-container" style="border-color: var(--neon-purple);">
+                <div id="lunch-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-right">
+        <div class="main-card" style="text-align: left; padding: 1.5rem;">
+            <h3>Actividades Específicas 🚀</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 0.5rem; margin-top: 15px;">
+                <input type="text" id="task-name" placeholder="Nombre (ej: Gym)" style="flex: 2;">
+                <input type="number" id="task-duration" placeholder="Minutos" style="flex: 1;">
+                <button class="btn-add" onclick="addTask()" style="margin-bottom:0;">+ Añadir</button>
+            </div>
+        </div>
+        <div id="task-list"></div>
+
+        <div id="completed-section">
+            <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; color: var(--neon-green);">Logros de Hoy 🏆</h3>
+            <div id="completed-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateMainTracker() {
+        const start = new Date(); const [sh, sm] = document.getElementById('start-time').value.split(':'); start.setHours(sh, sm, 0);
+        const end = new Date(); const [eh, em] = document.getElementById('end-time').value.split(':'); end.setHours(eh, em, 0);
+        const now = new Date(); const bar = document.getElementById('main-bar'); const pctText = document.getElementById('main-pct'); const timeText = document.getElementById('main-time');
+
+        if (now < start) { bar.style.width = "100%"; pctText.textContent = "100%"; timeText.textContent = "Esperando inicio..."; return; }
+        if (now > end) { bar.style.width = "0%"; pctText.textContent = "0%"; timeText.textContent = "¡Día terminado!"; return; }
+
+        const pct = ((end - now) / (end - start)) * 100;
+        bar.style.width = pct + "%"; pctText.textContent = Math.floor(pct) + "%";
+        
+        const sTotal = Math.floor((end - now) / 1000);
+        timeText.textContent = `${Math.floor(sTotal / 3600).toString().padStart(2,'0')}:${Math.floor((sTotal % 3600) / 60).toString().padStart(2,'0')}:${(sTotal % 60).toString().padStart(2,'0')} restantes`;
+
+        if ((end - now) < 3600000) { bar.classList.add('warning-mode'); pctText.style.color = "var(--neon-red)"; pctText.style.textShadow = "0 0 15px var(--neon-red)"; } 
+        else { bar.classList.remove('warning-mode'); pctText.style.color = "var(--neon-green)"; pctText.style.textShadow = "0 0 15px var(--neon-green)"; }
+    }
+
+    function updateLunchTracker() {
+        const start = new Date(); const [sh, sm] = document.getElementById('start-time').value.split(':'); start.setHours(sh, sm, 0);
+        const lunch = new Date(); const [lh, lm] = document.getElementById('lunch-time').value.split(':'); lunch.setHours(lh, lm, 0);
+        const now = new Date(); const bar = document.getElementById('lunch-bar'); const pctText = document.getElementById('lunch-pct'); const timeText = document.getElementById('lunch-time-text');
+
+        if (now < start) { bar.style.width = "100%"; pctText.textContent = "100%"; timeText.textContent = "Esperando inicio..."; return; }
+        if (now >= lunch) { bar.style.width = "0%"; pctText.textContent = "0%"; timeText.textContent = "¡Hora de comer! 🍽️"; return; }
+
+        const pct = ((lunch - now) / (lunch - start)) * 100;
+        bar.style.width = pct + "%"; pctText.textContent = Math.floor(pct) + "%";
+        
+        const sTotal = Math.floor((lunch - now) / 1000);
+        timeText.textContent = `${Math.floor(sTotal / 3600).toString().padStart(2,'0')}:${Math.floor((sTotal % 3600) / 60).toString().padStart(2,'0')}:${(sTotal % 60).toString().padStart(2,'0')} para el break`;
+    }
+
+    let tasks = [];
+    let completedTasks = [];
+    const neonPalette = ['#00f7ff', '#39ff14', '#fff01f', '#ff073a', '#bc13fe', '#ff1493', '#ff8c00', '#00ffcc'];
+
+    function addTask() {
+        const name = document.getElementById('task-name').value || "Actividad";
+        const duration = parseFloat(document.getElementById('task-duration').value);
+
+        if (!duration || duration <= 0) return alert("Pon una duración válida");
+
+        const taskId = Date.now();
+        const taskColor = neonPalette[Math.floor(Math.random() * neonPalette.length)];
+
+        const newTask = {
+            id: taskId,
+            name: name,
+            endTime: Date.now() + (duration * 60 * 1000),
+            totalDuration: duration * 60 * 1000,
+            remainingMs: duration * 60 * 1000,
+            color: taskColor,
+            isRunning: true,
+            isCompleted: false,
+            pauseStartTime: null 
+        };
+
+        tasks.push(newTask);
+
+        const list = document.getElementById('task-list');
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.id = `task-container-${taskId}`;
+        card.style.borderColor = taskColor;
+        card.style.boxShadow = `0 0 15px ${taskColor}40`;
+
+        card.innerHTML = `
+            <div class="task-header">
+                <span class="task-title" style="color: ${taskColor};">${name}</span>
+                <div class="actions">
+                    <span id="time-${taskId}" style="font-family: monospace; font-size: 1.1rem; min-width: 130px; text-align: right; text-shadow: 0 0 5px white; margin-right: 10px;"></span>
+                    <button id="btn-pause-${taskId}" class="action-btn pause-btn" onclick="togglePause(${taskId})">⏸️</button>
+                    <button class="action-btn delete-btn" onclick="removeTask(${taskId})">✖</button>
+                </div>
+            </div>
+            <div class="progress-container" style="height:15px; margin: 10px 0 0 0; border-color: ${taskColor};">
+                <div id="bar-${taskId}" class="task-bar" style="height: 100%; border-radius: 50px;"></div>
+            </div>
+        `;
+        list.appendChild(card);
+
+        document.getElementById('task-name').value = "";
+        document.getElementById('task-duration').value = "";
+    }
+
+    function togglePause(id) {
+        const task = tasks.find(t => t.id === id);
+        if (!task || task.isCompleted) return;
+
+        if (task.isRunning) {
+            task.remainingMs = Math.max(0, task.endTime - Date.now());
+            task.isRunning = false;
+            task.pauseStartTime = Date.now(); 
+        } else {
+            task.endTime = Date.now() + task.remainingMs;
+            task.isRunning = true;
+            task.pauseStartTime = null; 
+        }
+        
+        const btn = document.getElementById(`btn-pause-${id}`);
+        if(btn) btn.textContent = task.isRunning ? "⏸️" : "▶️";
+    }
+
+    function updateTasks() {
+        const now = Date.now();
+
+        tasks.forEach(task => {
+            if (task.isCompleted) return;
+
+            let remaining = task.isRunning ? Math.max(0, task.endTime - now) : task.remainingMs;
+            if (task.isRunning) task.remainingMs = remaining; 
+
+            const pct = (remaining / task.totalDuration) * 100;
+            const sTotal = Math.floor(remaining / 1000);
+            const m = Math.floor(sTotal / 60);
+            const s = sTotal % 60;
+            const ms = remaining % 1000;
+
+            const timeElement = document.getElementById(`time-${task.id}`);
+            const barElement = document.getElementById(`bar-${task.id}`);
+
+            if (timeElement && barElement) {
+                if (!task.isRunning) {
+                    // MODO PAUSADO: Calcular y mostrar el tiempo que lleva en pausa
+                    const pausedForMs = now - task.pauseStartTime;
+                    const pSecs = Math.floor(pausedForMs / 1000);
+                    const pM = Math.floor(pSecs / 60);
+                    const pS = pSecs % 60;
+                    
+                    timeElement.innerHTML = `${m}:${s.toString().padStart(2,'0')} <span style="font-size:0.75rem; color:var(--neon-yellow); vertical-align:middle; text-shadow:0 0 8px var(--neon-yellow); margin-left: 5px;">⏸️ ${pM}:${pS.toString().padStart(2,'0')}</span>`;
+                    barElement.style.opacity = "0.4"; 
+                } else if (remaining <= 60000 && remaining > 0) {
+                    timeElement.innerHTML = `<span class="ms-alert">00:${s.toString().padStart(2,'0')}.${ms.toString().padStart(3,'0')}</span>`;
+                    barElement.style.opacity = "1";
+                } else {
+                    timeElement.innerHTML = `${m}:${s.toString().padStart(2,'0')}`;
+                    barElement.style.opacity = "1";
+                }
+
+                barElement.style.width = `${pct}%`;
+                
+                if (pct < 20 && task.isRunning) {
+                     barElement.style.background = 'linear-gradient(90deg, var(--neon-yellow), var(--neon-red))';
+                     barElement.style.boxShadow = '0 0 15px var(--neon-red)';
+                } else {
+                     barElement.style.background = `linear-gradient(90deg, #000000, ${task.color})`;
+                     barElement.style.boxShadow = `0 0 15px ${task.color}`;
+                }
+            }
+
+            if (remaining === 0 && task.isRunning) {
+                task.isCompleted = true;
+                const card = document.getElementById(`task-container-${task.id}`);
+                if (card) {
+                    card.style.opacity = "0"; 
+                    setTimeout(() => {
+                        card.remove();
+                        tasks = tasks.filter(t => t.id !== task.id);
+                        completedTasks.push(task);
+                        renderCompletedTasks();
+                    }, 500); 
+                }
+            }
+        });
+    }
+
+    function removeTask(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        const card = document.getElementById(`task-container-${id}`);
+        if (card) card.remove();
+    }
+
+    function renderCompletedTasks() {
+        const section = document.getElementById('completed-section');
+        const list = document.getElementById('completed-list');
+        
+        if (completedTasks.length > 0) {
+            section.style.display = "block";
+        }
+        
+        list.innerHTML = completedTasks.map(t => `
+            <div class="completed-card" style="border-left-color: ${t.color}">
+                <strong style="color: ${t.color}; text-shadow: 0 0 5px ${t.color}80">${t.name}</strong>
+                <span style="color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); font-weight: bold;">✓ Listo</span>
+            </div>
+        `).join('');
+    }
+
+    setInterval(() => {
+        updateMainTracker();
+        updateLunchTracker();
+        updateTasks();
+    }, 50);
+
+</script>
+
+</body>
+</html>
