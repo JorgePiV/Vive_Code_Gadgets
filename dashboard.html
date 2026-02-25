@@ -7,48 +7,27 @@
     <style>
         /* PALETA NEÓN */
         :root {
-            --bg: #000000;
-            --card: #050505;
-            --text-primary: #ffffff;
-            --text-secondary: #a3a3a3;
-            --border-color: #ffffff;
-            
-            --neon-blue: #00f7ff;
-            --neon-green: #39ff14;
-            --neon-yellow: #fff01f;
-            --neon-red: #ff073a;
-            --neon-purple: #bc13fe;
+            --bg: #000000; --card: #050505; --text-primary: #ffffff;
+            --text-secondary: #a3a3a3; --border-color: #ffffff;
+            --neon-blue: #00f7ff; --neon-green: #39ff14; --neon-yellow: #fff01f;
+            --neon-red: #ff073a; --neon-purple: #bc13fe;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            padding: 2rem;
-            margin: 0;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg);
+            color: var(--text-primary); display: flex; justify-content: center;
+            padding: 2rem; margin: 0; min-height: 100vh;
         }
         
         .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            width: 100%;
-            max-width: 1100px;
-            align-items: start;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+            width: 100%; max-width: 1100px; align-items: start;
         }
 
         .main-card {
-            background: var(--card);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 3px solid var(--border-color);
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            background: var(--card); padding: 2rem; border-radius: 15px;
+            border: 3px solid var(--border-color); width: 100%; box-sizing: border-box;
+            text-align: center; box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
         
         h2, h3 { text-transform: uppercase; letter-spacing: 2px; margin-top: 0; text-shadow: 0 0 10px currentColor; }
@@ -138,6 +117,14 @@
             align-items: center; opacity: 0.8; animation: fadeIn 0.5s ease;
         }
         
+        /* Botón de limpiar memoria */
+        .btn-clear {
+            background: none; border: 1px solid var(--neon-red); color: var(--neon-red);
+            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem;
+            margin-top: 10px; transition: all 0.3s; width: 100%; text-transform: uppercase;
+        }
+        .btn-clear:hover { background: var(--neon-red); color: black; box-shadow: 0 0 10px var(--neon-red); }
+
         @media (max-width: 800px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -150,11 +137,11 @@
             <div class="inputs">
                 <div class="input-group">
                     <label>ENTRADA</label>
-                    <input type="time" id="start-time" value="08:00">
+                    <input type="time" id="start-time" value="08:00" onchange="saveData()">
                 </div>
                 <div class="input-group">
                     <label>SALIDA</label>
-                    <input type="time" id="end-time" value="17:00">
+                    <input type="time" id="end-time" value="17:00" onchange="saveData()">
                 </div>
             </div>
             <div id="main-pct">100%</div>
@@ -169,7 +156,7 @@
             <div class="inputs">
                 <div class="input-group">
                     <label>HORA DE COMER</label>
-                    <input type="time" id="lunch-time" value="13:00" style="border-color: var(--neon-purple);">
+                    <input type="time" id="lunch-time" value="13:00" style="border-color: var(--neon-purple);" onchange="saveData()">
                 </div>
             </div>
             <div id="lunch-pct">100%</div>
@@ -194,11 +181,63 @@
         <div id="completed-section">
             <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; color: var(--neon-green);">Logros de Hoy 🏆</h3>
             <div id="completed-list"></div>
+            <button class="btn-clear" onclick="clearMemory()">Borrar Historial y Reiniciar</button>
         </div>
     </div>
 </div>
 
 <script>
+    // --- VARIABLES GLOBALES ---
+    let tasks = [];
+    let completedTasks = [];
+    const neonPalette = ['#00f7ff', '#39ff14', '#fff01f', '#ff073a', '#bc13fe', '#ff1493', '#ff8c00', '#00ffcc'];
+
+    // --- SISTEMA DE MEMORIA (LocalStorage) ---
+    function saveData() {
+        const dataToSave = {
+            startTime: document.getElementById('start-time').value,
+            endTime: document.getElementById('end-time').value,
+            lunchTime: document.getElementById('lunch-time').value,
+            activeTasks: tasks,
+            doneTasks: completedTasks
+        };
+        localStorage.setItem('neonDashboardData', JSON.stringify(dataToSave));
+    }
+
+    function loadData() {
+        const savedData = localStorage.getItem('neonDashboardData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            
+            // Cargar horas
+            if (data.startTime) document.getElementById('start-time').value = data.startTime;
+            if (data.endTime) document.getElementById('end-time').value = data.endTime;
+            if (data.lunchTime) document.getElementById('lunch-time').value = data.lunchTime;
+            
+            // Cargar tareas
+            tasks = data.activeTasks || [];
+            completedTasks = data.doneTasks || [];
+
+            // Dibujar las tareas que estaban activas
+            document.getElementById('task-list').innerHTML = "";
+            tasks.forEach(task => renderTaskHTML(task));
+
+            // Dibujar historial
+            renderCompletedTasks();
+        }
+    }
+
+    function clearMemory() {
+        if(confirm("¿Estás seguro de borrar todo el historial? Esto dejará el tablero en limpio.")) {
+            localStorage.removeItem('neonDashboardData');
+            tasks = [];
+            completedTasks = [];
+            document.getElementById('task-list').innerHTML = "";
+            document.getElementById('completed-section').style.display = "none";
+        }
+    }
+
+    // --- LÓGICA JORNADA Y ALMUERZO ---
     function updateMainTracker() {
         const start = new Date(); const [sh, sm] = document.getElementById('start-time').value.split(':'); start.setHours(sh, sm, 0);
         const end = new Date(); const [eh, em] = document.getElementById('end-time').value.split(':'); end.setHours(eh, em, 0);
@@ -232,9 +271,30 @@
         timeText.textContent = `${Math.floor(sTotal / 3600).toString().padStart(2,'0')}:${Math.floor((sTotal % 3600) / 60).toString().padStart(2,'0')}:${(sTotal % 60).toString().padStart(2,'0')} para el break`;
     }
 
-    let tasks = [];
-    let completedTasks = [];
-    const neonPalette = ['#00f7ff', '#39ff14', '#fff01f', '#ff073a', '#bc13fe', '#ff1493', '#ff8c00', '#00ffcc'];
+    // --- RENDERIZADO DE TAREAS ---
+    function renderTaskHTML(task) {
+        const list = document.getElementById('task-list');
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.id = `task-container-${task.id}`;
+        card.style.borderColor = task.color;
+        card.style.boxShadow = `0 0 15px ${task.color}40`;
+
+        card.innerHTML = `
+            <div class="task-header">
+                <span class="task-title" style="color: ${task.color};">${task.name}</span>
+                <div class="actions">
+                    <span id="time-${task.id}" style="font-family: monospace; font-size: 1.1rem; min-width: 130px; text-align: right; text-shadow: 0 0 5px white; margin-right: 10px;"></span>
+                    <button id="btn-pause-${task.id}" class="action-btn pause-btn" onclick="togglePause(${task.id})">${task.isRunning ? '⏸️' : '▶️'}</button>
+                    <button class="action-btn delete-btn" onclick="removeTask(${task.id})">✖</button>
+                </div>
+            </div>
+            <div class="progress-container" style="height:15px; margin: 10px 0 0 0; border-color: ${task.color};">
+                <div id="bar-${task.id}" class="task-bar" style="height: 100%; border-radius: 50px;"></div>
+            </div>
+        `;
+        list.appendChild(card);
+    }
 
     function addTask() {
         const name = document.getElementById('task-name').value || "Actividad";
@@ -246,43 +306,18 @@
         const taskColor = neonPalette[Math.floor(Math.random() * neonPalette.length)];
 
         const newTask = {
-            id: taskId,
-            name: name,
-            endTime: Date.now() + (duration * 60 * 1000),
-            totalDuration: duration * 60 * 1000,
-            remainingMs: duration * 60 * 1000,
-            color: taskColor,
-            isRunning: true,
-            isCompleted: false,
-            pauseStartTime: null 
+            id: taskId, name: name, endTime: Date.now() + (duration * 60 * 1000),
+            totalDuration: duration * 60 * 1000, remainingMs: duration * 60 * 1000,
+            color: taskColor, isRunning: true, isCompleted: false, pauseStartTime: null 
         };
 
         tasks.push(newTask);
-
-        const list = document.getElementById('task-list');
-        const card = document.createElement('div');
-        card.className = 'task-card';
-        card.id = `task-container-${taskId}`;
-        card.style.borderColor = taskColor;
-        card.style.boxShadow = `0 0 15px ${taskColor}40`;
-
-        card.innerHTML = `
-            <div class="task-header">
-                <span class="task-title" style="color: ${taskColor};">${name}</span>
-                <div class="actions">
-                    <span id="time-${taskId}" style="font-family: monospace; font-size: 1.1rem; min-width: 130px; text-align: right; text-shadow: 0 0 5px white; margin-right: 10px;"></span>
-                    <button id="btn-pause-${taskId}" class="action-btn pause-btn" onclick="togglePause(${taskId})">⏸️</button>
-                    <button class="action-btn delete-btn" onclick="removeTask(${taskId})">✖</button>
-                </div>
-            </div>
-            <div class="progress-container" style="height:15px; margin: 10px 0 0 0; border-color: ${taskColor};">
-                <div id="bar-${taskId}" class="task-bar" style="height: 100%; border-radius: 50px;"></div>
-            </div>
-        `;
-        list.appendChild(card);
+        renderTaskHTML(newTask);
 
         document.getElementById('task-name').value = "";
         document.getElementById('task-duration').value = "";
+        
+        saveData(); // Guardar en memoria
     }
 
     function togglePause(id) {
@@ -301,6 +336,8 @@
         
         const btn = document.getElementById(`btn-pause-${id}`);
         if(btn) btn.textContent = task.isRunning ? "⏸️" : "▶️";
+        
+        saveData(); // Guardar el estado de pausa
     }
 
     function updateTasks() {
@@ -316,14 +353,12 @@
             const sTotal = Math.floor(remaining / 1000);
             const m = Math.floor(sTotal / 60);
             const s = sTotal % 60;
-            const ms = remaining % 1000;
 
             const timeElement = document.getElementById(`time-${task.id}`);
             const barElement = document.getElementById(`bar-${task.id}`);
 
             if (timeElement && barElement) {
                 if (!task.isRunning) {
-                    // MODO PAUSADO: Calcular y mostrar el tiempo que lleva en pausa
                     const pausedForMs = now - task.pauseStartTime;
                     const pSecs = Math.floor(pausedForMs / 1000);
                     const pM = Math.floor(pSecs / 60);
@@ -332,6 +367,7 @@
                     timeElement.innerHTML = `${m}:${s.toString().padStart(2,'0')} <span style="font-size:0.75rem; color:var(--neon-yellow); vertical-align:middle; text-shadow:0 0 8px var(--neon-yellow); margin-left: 5px;">⏸️ ${pM}:${pS.toString().padStart(2,'0')}</span>`;
                     barElement.style.opacity = "0.4"; 
                 } else if (remaining <= 60000 && remaining > 0) {
+                    const ms = remaining % 1000;
                     timeElement.innerHTML = `<span class="ms-alert">00:${s.toString().padStart(2,'0')}.${ms.toString().padStart(3,'0')}</span>`;
                     barElement.style.opacity = "1";
                 } else {
@@ -350,6 +386,7 @@
                 }
             }
 
+            // Cuando la tarea termina
             if (remaining === 0 && task.isRunning) {
                 task.isCompleted = true;
                 const card = document.getElementById(`task-container-${task.id}`);
@@ -360,6 +397,7 @@
                         tasks = tasks.filter(t => t.id !== task.id);
                         completedTasks.push(task);
                         renderCompletedTasks();
+                        saveData(); // Guardar que se completó
                     }, 500); 
                 }
             }
@@ -370,6 +408,7 @@
         tasks = tasks.filter(t => t.id !== id);
         const card = document.getElementById(`task-container-${id}`);
         if (card) card.remove();
+        saveData(); // Guardar la eliminación
     }
 
     function renderCompletedTasks() {
@@ -378,6 +417,8 @@
         
         if (completedTasks.length > 0) {
             section.style.display = "block";
+        } else {
+            section.style.display = "none";
         }
         
         list.innerHTML = completedTasks.map(t => `
@@ -387,6 +428,9 @@
             </div>
         `).join('');
     }
+
+    // --- INICIALIZACIÓN ---
+    loadData(); // Leer memoria al arrancar la página
 
     setInterval(() => {
         updateMainTracker();
