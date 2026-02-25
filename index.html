@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jorge Pico Vela | Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-blue: #00f7ff;
+            --accent-purple: #bc13fe;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background: rgba(5, 5, 5, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+        }
+        nav h1 { margin: 0; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
+        nav h1 span { color: var(--accent-blue); }
+        nav ul { list-style: none; display: flex; gap: 2rem; margin: 0; padding: 0; align-items: center; }
+        nav a { color: var(--text-main); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+        nav a:hover { color: var(--accent-blue); text-shadow: 0 0 10px var(--accent-blue); }
+        .nav-link-external { color: var(--text-muted); border-bottom: 1px solid transparent; padding-bottom: 2px; }
+        .nav-link-external:hover { color: var(--text-main); border-bottom-color: var(--text-main); text-shadow: none; }
+
+        /* --- GLOBAL SECTIONS --- */
+        section { padding: 5rem 5%; max-width: 1000px; margin: 0 auto; }
+        h2 { font-size: 2rem; margin-bottom: 2rem; border-left: 3px solid var(--accent-purple); padding-left: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- HERO --- */
+        .hero {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        .hero h2 { border: none; padding: 0; font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1.1; letter-spacing: normal; text-transform: none; }
+        .hero h2 span { background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin-bottom: 2rem; }
+        
+        /* Buttons */
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn {
+            display: inline-block; padding: 10px 25px; border-radius: 6px;
+            text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+            border: 1px solid var(--accent-blue); color: var(--text-main);
+            transition: all 0.3s;
+        }
+        .btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); }
+        .btn-secondary { border-color: #333; color: var(--text-muted); }
+        .btn-secondary:hover { background: #222; color: var(--text-main); box-shadow: none; border-color: #555; }
+
+        /* --- CARDS --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .card {
+            background: var(--card-bg); padding: 2rem; border-radius: 8px;
+            border: 1px solid #222; transition: transform 0.3s, border-color 0.3s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent-blue); }
+        .card h3 { margin-top: 0; font-size: 1.2rem; color: var(--text-main); }
+        .card .date { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; display: block; }
+        .card p { color: var(--text-muted); font-size: 0.95rem; }
+        
+        /* --- SKILLS --- */
+        .skills-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+        .skill-tag { background: #1a1a1a; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #333; color: var(--text-muted); }
+
+        footer { text-align: center; padding: 2rem; border-top: 1px solid #222; margin-top: 3rem; color: var(--text-muted); font-size: 0.85rem; }
+
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 2.5rem; }
+            nav ul { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>Jorge<span>.</span>Pico</h1>
+        <ul>
+            <li><a href="#profile">Profile</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="https://www.linkedin.com/in/jorge-pico-vela-18202b1ba" target="_blank" class="nav-link-external">LinkedIn</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero" id="home">
+        <p style="color: var(--accent-blue); margin-bottom: 0.5rem; font-weight: bold; letter-spacing: 1px;">Jorge Pico Vela</p>
+        <h2>Physicist & <br><span>Data Analyst</span></h2>
+        <p>I apply the analytical rigor of physics to solve corporate challenges, developing Business Intelligence tools and optimizing processes through data analysis.</p>
+        <div class="btn-group">
+            <a href="#projects" class="btn">View Projects</a>
+            <a href="https://www.linkedin.com/in/jorge-pico-vela-18202b1ba" target="_blank" class="btn btn-secondary">LinkedIn</a>
+        </div>
+    </section>
+
+    <section id="profile">
+        <h2>Professional Profile</h2>
+        <div class="card">
+            <p>I am a physicist graduated from <strong>Yachay Tech University</strong>, currently pursuing a Master's degree in Fundamental Physics with a technical focus on Materials Science and Nanotechnology.</p>
+            <p>Alongside my scientific training and research, I have directed my professional development towards Data Science and Business Intelligence. In my current role as a Product and Quality Analyst, I leverage computational programming tools to design reports, automate metrics, and support strategic decision-making.</p>
+            <p>I am highly interested in applied technological development, transforming complex data from diverse sources into structured, actionable, and accessible information.</p>
+            
+            <h3 style="margin-top: 2rem; font-size: 1rem; color: var(--text-main);">Technologies & Tools</h3>
+            <div class="skills-container">
+                <span class="skill-tag">Python (Pandas, Matplotlib)</span>
+                <span class="skill-tag">Web Development (HTML, CSS, JS)</span>
+                <span class="skill-tag">Wolfram Mathematica</span>
+                <span class="skill-tag">LaTeX</span>
+                <span class="skill-tag">BI Analysis</span>
+                <span class="skill-tag">English (C1)</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <h2>Experience</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 style="color: var(--accent-blue);">Data and Quality Specialist</h3>
+                <span class="date">Tonicomsa S.A. | Quito, Ecuador | Jul 2024 - Present</span>
+                <p>Management of quality assurance processes for Personal Protective Equipment (PPE) and compliance with regulatory standards. Development of data analysis aimed at inventory optimization, product performance monitoring, and the generation of technical reports.</p>
+            </div>
+            
+            <div class="card">
+                <h3 style="color: var(--accent-blue);">Research Assistant</h3>
+                <span class="date">Yachay Tech University | Urcuquí, Ecuador | Nov 2021 - Feb 2022</span>
+                <p>Research in dynamical systems and chaos modeling. Provided technical support in data processing and the development of numerical simulations for the analysis of complex systems.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2>Projects</h2>
+        <div class="grid">
+            
+            <div class="card" style="border-color: #333;">
+                <h3 style="color: var(--accent-purple);">Productivity Dashboard</h3>
+                <p>Time management web application developed natively with JavaScript, HTML, and CSS. It integrates dynamic timers for workday tracking, real-time task management, and data persistence using the browser's <code>localStorage</code>.</p>
+                <div class="skills-container" style="margin-bottom: 1.5rem;">
+                    <span class="skill-tag">Vanilla JavaScript</span>
+                    <span class="skill-tag">CSS Grid</span>
+                    <span class="skill-tag">DOM Manipulation</span>
+                </div>
+                <a href="dashboard.html" class="btn" style="border-color: var(--accent-purple); padding: 6px 15px; font-size: 0.8rem;">View App</a>
+            </div>
+
+            <div class="card">
+                <h3 style="color: var(--accent-blue);">Customs Data Processing</h3>
+                <p>Automation of data cleaning and analysis of foreign trade databases from sources such as Datasur and Veritrade. Used Python to extract metrics, identify market trends, and present data visualizations for commercial intelligence.</p>
+                <div class="skills-container">
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">Pandas</span>
+                    <span class="skill-tag">Matplotlib</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Contact</h2>
+        <div class="card" style="text-align: left; max-width: 600px; margin: 0 auto;">
+            <p>If you are looking to collaborate on data analysis projects, internal tool development, or scientific research, feel free to reach out directly.</p>
+            
+            <div style="display: flex; gap: 1.5rem; align-items: center; margin: 1.5rem 0; flex-wrap: wrap;">
+                <a href="mailto:jorge.pico99@outlook.com" style="color: var(--text-main); font-weight: bold; font-size: 1.1rem; text-decoration: none; border-bottom: 1px solid var(--accent-blue); padding-bottom: 2px;">jorge.pico99@outlook.com</a>
+                <a href="https://www.linkedin.com/in/jorge-pico-vela-18202b1ba" target="_blank" style="color: var(--text-muted); font-size: 1rem; text-decoration: none; border-bottom: 1px solid #333; padding-bottom: 2px; transition: color 0.3s;">LinkedIn</a>
+            </div>
+            
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Quito, Ecuador</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 Jorge Pico Vela.</p>
+    </footer>
+
+</body>
+</html>
