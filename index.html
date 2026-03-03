@@ -67,6 +67,8 @@
             text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
             border: 1px solid var(--accent-blue); color: var(--text-main);
             transition: all 0.3s;
+            cursor: pointer;
+            background: transparent;
         }
         .btn:hover { background: var(--accent-blue); color: #000; box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); }
         .btn-secondary { border-color: #333; color: var(--text-muted); }
@@ -169,6 +171,16 @@
                 <a href="dashboard.html" class="btn" style="border-color: var(--accent-purple); padding: 6px 15px; font-size: 0.8rem;">View App</a>
             </div>
 
+            <div class="card" style="border-color: #333;">
+                <h3 style="color: var(--accent-blue);">Global Timezone Tool</h3>
+                <p>Interactive web tool to compare and track multiple international time zones simultaneously in real-time, built natively without external libraries.</p>
+                <div class="skills-container" style="margin-bottom: 1.5rem;">
+                    <span class="skill-tag">Vanilla JavaScript</span>
+                    <span class="skill-tag">HTML/CSS</span>
+                </div>
+                <a href="time.html" class="btn" style="border-color: var(--accent-blue); padding: 6px 15px; font-size: 0.8rem;">View Tool</a>
+            </div>
+
             <div class="card">
                 <h3 style="color: var(--accent-blue);">Customs Data Processing</h3>
                 <p>Automation of data cleaning and analysis of foreign trade databases from sources such as Datasur and Veritrade. Used Python to extract metrics, identify market trends, and present data visualizations for commercial intelligence.</p>
@@ -199,8 +211,8 @@
     <footer>
         <p>© 2026 Jorge Pico Vela.</p>
     </footer>
-<div id="atractor-container" style="position: fixed; top: 0; right: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.7; pointer-events: none;"></div>
 
+<div id="atractor-container" style="position: fixed; top: 0; right: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.7; pointer-events: none;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
     const container = document.getElementById('atractor-container');
