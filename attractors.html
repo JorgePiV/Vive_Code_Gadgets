@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaos Lab | Jorge Pico Vela</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-blue: #00f7ff;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: rgba(5, 5, 5, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+            z-index: 1000;
+        }
+        nav h1 { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin: 0; }
+        nav h1 span { color: var(--accent-blue); }
+        nav ul { list-style: none; display: flex; gap: 2rem; margin: 0; }
+        nav a { color: var(--text-main); text-decoration: none; font-size: 0.8rem; transition: 0.3s; }
+        nav a:hover { color: var(--accent-blue); }
+
+        main { flex: 1; padding: 2rem 5%; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        
+        .lab-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            height: 75vh;
+            min-height: 600px;
+        }
+
+        .controls-panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            overflow-y: auto;
+        }
+
+        .select-dark { 
+            background: #1a1a1a; color: white; border: 1px solid var(--accent-blue); 
+            padding: 10px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold;
+        }
+
+        .formula-box {
+            background: #000;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+            min-height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .slider-group { display: flex; flex-direction: column; gap: 4px; }
+        .slider-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); }
+        .val-display { color: var(--accent-blue); font-family: monospace; font-weight: bold; }
+
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 3px; background: #333; outline: none; border-radius: 2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: white; border-radius: 50%; cursor: pointer; border: 2px solid var(--accent-blue); }
+
+        .btn-reset {
+            background: transparent; border: 1px solid #444; color: var(--text-muted);
+            padding: 10px; border-radius: 6px; cursor: pointer; margin-top: auto; transition: 0.3s;
+        }
+        .btn-reset:hover { border-color: white; color: white; }
+
+        .canvas-container {
+            border-radius: 12px;
+            border: 1px solid #222;
+            background: #000;
+            position: relative;
+            cursor: grab;
+        }
+        .canvas-container:active { cursor: grabbing; }
+
+        footer { text-align: center; padding: 1.5rem; color: #555; font-size: 0.8rem; border-top: 1px solid #222; margin-top: 1rem; }
+
+        @media (max-width: 900px) {
+            .lab-container { grid-template-columns: 1fr; height: auto; }
+            .canvas-container { height: 450px; }
+        }
+    </style>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+    <nav>
+        <h1>Chaos<span>.</span>Lab</h1>
+        <ul>
+            <li><a href="index.html">PORTFOLIO</a></li>
+            <li><a href="dashboard.html">DASHBOARD</a></li>
+            <li><a href="time.html">TIMEZONES</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="lab-container">
+            <div class="controls-panel">
+                <select id="attractorSelect" class="select-dark" onchange="changeAttractor()">
+                    <option value="lorenz">Lorenz Attractor</option>
+                    <option value="rossler">Rössler Attractor</option>
+                    <option value="chen">Chen Attractor</option>
+                    <option value="halvorsen">Halvorsen Attractor</option>
+                    <option value="thomas">Thomas Attractor</option>
+                    <option value="aizawa">Aizawa Attractor</option>
+                    <option value="sprott">Sprott Case A</option>
+                </select>
+
+                <div class="formula-box" id="formulaBox"></div>
+
+                <div id="slidersContainer"></div>
+
+                <button class="btn-reset" onclick="resetParameters()">Reiniciar Vista y Parámetros</button>
+            </div>
+
+            <div class="canvas-container" id="canvas3d"></div>
+        </div>
+    </main>
+
+    <footer>Jorge Pico Vela | Exploración Matemática y Caos Determinista</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+    const attractors = {
+        lorenz: {
+            name: "Lorenz",
+            tex: `\\begin{cases} \\dot{x}=\\sigma(y-x) \\\\ \\dot{y}=x(\\rho-z)-y \\\\ \\dot{z}=xy-\\beta z \\end{cases}`,
+            params: { a: { label: "σ (Sigma)", val: 10, def: 10, min: 1, max: 30 }, b: { label: "ρ (Rho)", val: 28, def: 28, min: 1, max: 50 }, c: { label: "β (Beta)", val: 2.666, def: 2.666, min: 0.1, max: 10 } },
+            dt: 0.01, points: 20000, scale: 1.5, camZ: 70, palette: 'plasma'
+        },
+        rossler: {
+            name: "Rössler",
+            tex: `\\begin{cases} \\dot{x}=-y-z \\\\ \\dot{y}=x+ay \\\\ \\dot{z}=b+z(x-c) \\end{cases}`,
+            params: { a: { label: "a", val: 0.2, def: 0.2, min: 0.1, max: 0.5 }, b: { label: "b", val: 0.2, def: 0.2, min: 0.1, max: 2 }, c: { label: "c", val: 5.7, def: 5.7, min: 1, max: 15 } },
+            dt: 0.05, points: 25000, scale: 2.5, camZ: 80, palette: 'magma'
+        },
+        chen: {
+            name: "Chen",
+            tex: `\\begin{cases} \\dot{x}=a(y-x) \\\\ \\dot{y}=(c-a)x-xz+cy \\\\ \\dot{z}=xy-bz \\end{cases}`,
+            params: { a: { label: "a", val: 35, def: 35, min: 20, max: 50 }, b: { label: "b", val: 3, def: 3, min: 1, max: 10 }, c: { label: "c", val: 28, def: 28, min: 10, max: 40 } },
+            dt: 0.005, points: 25000, scale: 1.2, camZ: 70, palette: 'viridis'
+        },
+        halvorsen: {
+            name: "Halvorsen",
+            tex: `\\begin{cases} \\dot{x}=-ax-4y-4z-y^2 \\\\ \\text{(Cíclico en y, z)} \\end{cases}`,
+            params: { a: { label: "a", val: 1.89, def: 1.89, min: 1, max: 3 } },
+            dt: 0.005, points: 20000, scale: 2.2, camZ: 70, palette: 'plasma'
+        },
+        thomas: {
+            name: "Thomas",
+            tex: `\\begin{cases} \\dot{x}=\\sin(y)-bx \\\\ \\dot{y}=\\sin(z)-by \\\\ \\dot{z}=\\sin(x)-bz \\end{cases}`,
+            params: { b: { label: "b (Fricción)", val: 0.19, def: 0.19, min: 0.01, max: 0.5 } },
+            dt: 0.12, points: 40000, scale: 10.0, camZ: 60, palette: 'viridis'
+        },
+        aizawa: {
+            name: "Aizawa",
+            tex: `\\begin{cases} \\dot{x}=(z-0.7)x-dy \\\\ \\dot{y}=dx+(z-0.7)y \\\\ \\dot{z}=0.6+az-\\frac{z^3}{3}-(x^2+y^2)(1+0.25z)+0.1zx^3 \\end{cases}`,
+            params: { a: { label: "a", val: 0.95, def: 0.95, min: 0.1, max: 2 }, d: { label: "d", val: 3.5, def: 3.5, min: 1, max: 5 } },
+            dt: 0.01, points: 30000, scale: 22.0, camZ: 50, palette: 'magma'
+        },
+        sprott: {
+            name: "Sprott Case A",
+            tex: `\\begin{cases} \\dot{x}=y \\\\ \\dot{y}=-x+yz \\\\ \\dot{z}=1-y^2 \\end{cases}`,
+            params: { s: { label: "Time Multiplier", val: 1, def: 1, min: 0.1, max: 2 } },
+            dt: 0.05, points: 25000, scale: 6.0, camZ: 50, palette: 'plasma'
+        }
+    };
+
+    let currentAtt = 'lorenz';
+    const container = document.getElementById('canvas3d');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 3000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.2;
+
+    let line, point, vectorPoints = [], currentIdx = 0;
+
+    // --- NUEVAS PALETAS NEÓN (Cero colores oscuros) ---
+    function getColor(t, palette) {
+        const colors = {
+            // Plasma brillante: Magenta -> Rosa -> Naranja -> Amarillo
+            plasma: [[156, 39, 176], [233, 30, 99], [248, 149, 64], [255, 235, 59]],
+            // Magma brillante: Morado Neón -> Rojo Neón -> Naranja -> Amarillo claro
+            magma: [[188, 19, 254], [255, 7, 58], [252, 137, 97], [252, 253, 191]],
+            // Viridis brillante: Cian Neón -> Verde Neón -> Amarillo
+            viridis: [[0, 247, 255], [57, 255, 20], [253, 231, 37]]
+        };
+        const p = colors[palette];
+        const seg = t * (p.length - 1);
+        const idx = Math.floor(seg);
+        const f = seg - idx;
+        const c1 = p[idx], c2 = p[idx+1] || p[idx];
+        return { r: (c1[0]+(c2[0]-c1[0])*f)/255, g: (c1[1]+(c2[1]-c1[1])*f)/255, b: (c1[2]+(c2[2]-c1[2])*f)/255 };
+    }
+
+    function init3D() {
+        if (line) scene.remove(line);
+        if (point) scene.remove(point);
+        const config = attractors[currentAtt];
+        const p = config.params;
+        const a = p.a?.val, b = p.b?.val, c = p.c?.val, d = p.d?.val, s = p.s?.val;
+
+        let x = 0.1, y = 0.1, z = 0.1;
+        if(currentAtt === 'halvorsen') { x = -5; y = 0; z = 0; }
+        if(currentAtt === 'sprott') { x = 0; y = 1; z = 0; }
+        if(currentAtt === 'aizawa') { x = 0.1; y = 0; z = 0; }
+
+        const raw = [];
+        const dt = config.dt;
+
+        for (let i = 0; i < config.points; i++) {
+            let dx=0, dy=0, dz=0;
+            if(currentAtt==='lorenz'){ dx=(a*(y-x))*dt; dy=(x*(b-z)-y)*dt; dz=(x*y-c*z)*dt; }
+            else if(currentAtt==='rossler'){ dx=(-y-z)*dt; dy=(x+a*y)*dt; dz=(b+z*(x-c))*dt; }
+            else if(currentAtt==='chen'){ dx=(a*(y-x))*dt; dy=((c-a)*x-x*z+c*y)*dt; dz=(x*y-b*z)*dt; }
+            else if(currentAtt==='halvorsen'){ dx=(-a*x-4*y-4*z-y*y)*dt; dy=(-a*y-4*z-4*x-z*z)*dt; dz=(-a*z-4*x-4*y-x*x)*dt; }
+            else if(currentAtt==='thomas'){ dx=(Math.sin(y)-b*x)*dt; dy=(Math.sin(z)-b*y)*dt; dz=(Math.sin(x)-b*z)*dt; }
+            else if(currentAtt==='aizawa'){ 
+                dx = ((z-0.7)*x - d*y)*dt;
+                dy = (d*x + (z-0.7)*y)*dt;
+                dz = (0.6 + a*z - (z*z*z)/3 - (x*x + y*y)*(1 + 0.25*z) + 0.1*z*(x*x*x))*dt;
+            }
+            else if(currentAtt==='sprott'){ dx=y*dt*s; dy=(-x+y*z)*dt*s; dz=(1-y*y)*dt*s; }
+            
+            x+=dx; y+=dy; z+=dz;
+            if (isNaN(x) || Math.abs(x) > 2000) break;
+            raw.push(new THREE.Vector3(x, y, z));
+        }
+
+        if (raw.length < 50) return;
+
+        const tempGeo = new THREE.BufferGeometry().setFromPoints(raw);
+        tempGeo.computeBoundingBox();
+        const center = new THREE.Vector3(); 
+        tempGeo.boundingBox.getCenter(center);
+        
+        const pos = new Float32Array(raw.length * 3), col = new Float32Array(raw.length * 3);
+        vectorPoints = [];
+        raw.forEach((v, i) => {
+            v.sub(center).multiplyScalar(config.scale);
+            pos[i*3]=v.x; pos[i*3+1]=v.y; pos[i*3+2]=v.z;
+            vectorPoints.push(v);
+            const clr = getColor(i/raw.length, config.palette);
+            col[i*3]=clr.r; col[i*3+1]=clr.g; col[i*3+2]=clr.b;
+        });
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+        
+        line = new THREE.Line(geo, new THREE.LineBasicMaterial({ 
+            vertexColors: true, 
+            transparent: true, 
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending 
+        }));
+        scene.add(line);
+
+        point = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        scene.add(point);
+        
+        camera.position.set(0, 0, config.camZ);
+        controls.target.set(0,0,0);
+        controls.update();
+    }
+
+    function changeAttractor() {
+        currentAtt = document.getElementById('attractorSelect').value;
+        const p = attractors[currentAtt].params;
+        const container = document.getElementById('slidersContainer');
+        container.innerHTML = "";
+        Object.keys(p).forEach(k => {
+            container.innerHTML += `
+                <div class="slider-group">
+                    <div class="slider-header"><span>${p[k].label}</span><span class="val-display" id="v-${k}">${p[k].val.toFixed(3)}</span></div>
+                    <input type="range" min="${p[k].min}" max="${p[k].max}" step="0.001" value="${p[k].val}" oninput="updateP('${k}', this.value)">
+                </div>`;
+        });
+        document.getElementById('formulaBox').innerHTML = `$$ ${attractors[currentAtt].tex} $$`;
+        if(window.MathJax) MathJax.typesetPromise();
+        init3D();
+    }
+
+    function updateP(k, v) {
+        attractors[currentAtt].params[k].val = parseFloat(v);
+        document.getElementById(`v-${k}`).innerText = parseFloat(v).toFixed(3);
+        init3D();
+    }
+
+    function resetParameters() {
+        Object.keys(attractors[currentAtt].params).forEach(k => {
+            attractors[currentAtt].params[k].val = attractors[currentAtt].params[k].def;
+        });
+        changeAttractor();
+        // Nota: Removido controls.reset(); para evitar que la cámara se congele
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        if(vectorPoints.length > 0) {
+            currentIdx = (currentIdx + 4) % vectorPoints.length; 
+            const p = vectorPoints[Math.floor(currentIdx)];
+            if(p) point.position.set(p.x, p.y, p.z);
+        }
+        renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+        const w = container.clientWidth, h = container.clientHeight;
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    });
+
+    changeAttractor(); 
+    animate();
+</script>
+</body>
+</html>
